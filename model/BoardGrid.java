@@ -18,14 +18,6 @@ public class BoardGrid {
         return this.col;
     }
 
-    public void setRow(int row) {
-        this.row = row;
-    }
-
-    public void setCol(int col) {
-        this.col = col;
-    }
-
     public Player getOccupant() {
         return this.occupant;
     }
