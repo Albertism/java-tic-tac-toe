@@ -31,7 +31,7 @@ public class BoardGrid {
     }
 
     public String getOccupantMarker() {
-        if (!isOccupied()) return "@";
+        if (!isOccupied()) return "#";
         return this.occupant.getStringMarker();
     }
 

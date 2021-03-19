@@ -20,10 +20,11 @@ class TicTacToes {
             System.out.println("Input size of the board: ");
             n = Integer.parseInt(reader.readLine());
         }
+        // Initialize players and board
         Player playerO = new Player(PlayerMarker.O);
         Player playerX = new Player(PlayerMarker.X);
-        Player[] playerArray = {playerO, playerX};
         Player currentPlayer = getRandomNumber(0, 1) == 0 ? playerO : playerX;
+        Player winner = null;
         // Holds game board grids for the game to place in
         BoardGrid[][] board = new BoardGrid[n][n];
         // Holds grids that represents each turn, it will later be shuffled to produce random order
@@ -42,17 +43,156 @@ class TicTacToes {
 
         // Shuffles board to imitate random turns
         Collections.shuffle(Arrays.asList(shuffledBoard));
+
+        // Begin game session
         System.out.println("Player " + currentPlayer.getStringMarker() + " goes first");
 
+        // Each shuffled board grid represents a random turn
         for (int i = 0; i < shuffledBoard.length; i++) {
-            System.out.println("Player " + currentPlayer.getStringMarker() + "'s turn");
             shuffledBoard[i].setOccupant(currentPlayer);
-            printBoard(board);
+            // After player takes turn, see if the player has won
+            if (didPlayerWin(shuffledBoard[i], board, currentPlayer)) {
+                winner = currentPlayer;
+                break;
+            }
+            // Switch player and proceed
             currentPlayer = currentPlayer == playerX ? playerO : playerX;
         }
 
-        System.out.println("game over");
+        // End of the game session, print board and the result
         printBoard(board);
+        if (winner != null) {
+            System.out.println(winner.getStringMarker() + " Won!");
+        } else {
+            System.out.println("It was a draw.");
+        }
+    }
+
+    // Checks if the player won after the move
+    public static boolean didPlayerWin(BoardGrid playedGrid, BoardGrid[][] board, Player currentPlayer) {
+        int currentRow = playedGrid.getRow();
+        int currentCol = playedGrid.getCol();
+
+        return didPlayerWinVertically(board, currentRow, currentCol, currentPlayer) ||
+                didPlayerWinHorizontally(board, currentRow, currentCol, currentPlayer) ||
+                didPlayerWinDiagonalLeft(board, currentRow, currentCol, currentPlayer) ||
+                didPlayerWinDiagonalRight(board, currentRow, currentCol, currentPlayer);
+    }
+
+    public static boolean didPlayerWinHorizontally(BoardGrid[][] board, int currentRow, int currentCol, Player currentPlayer) {
+        int count = 0;
+        int n = board.length;
+        BoardGrid currentGrid = board[currentRow][currentCol];
+        // count player's marker towards right
+        while (currentGrid.isOccupied() && currentGrid.getOccupant() == currentPlayer) {
+            count++;
+            if (currentGrid.getCol() == n - 1) {
+                break;
+            }
+            currentGrid = board[currentRow][currentGrid.getCol() + 1];
+        }
+        // reset the current grid (this will have a duplicate count)
+        currentGrid = board[currentRow][currentCol];
+
+        // count player's marker toward left
+        while (currentGrid.isOccupied() && currentGrid.getOccupant() == currentPlayer) {
+            count++;
+            if (currentGrid.getCol() == 0) {
+                break;
+            }
+            currentGrid = board[currentRow][currentGrid.getCol() - 1];
+        }
+        // uncount duplicate
+        count--;
+
+        return count >= n;
+    }
+
+    public static boolean didPlayerWinVertically(BoardGrid[][] board, int currentRow, int currentCol, Player currentPlayer) {
+        int count = 0;
+        int n = board.length;
+        BoardGrid currentGrid = board[currentRow][currentCol];
+        // count player's marker downwards
+        while (currentGrid.isOccupied() && currentGrid.getOccupant() == currentPlayer) {
+            count++;
+            if (currentGrid.getRow() == n - 1) {
+                break;
+            }
+            currentGrid = board[currentGrid.getRow() + 1][currentCol];
+        }
+        // reset the current grid (this will have a duplicate count)
+        currentGrid = board[currentRow][currentCol];
+
+        // count player's marker upwards
+        while (currentGrid.isOccupied() && currentGrid.getOccupant() == currentPlayer) {
+            count++;
+            if (currentGrid.getRow() == 0) {
+                break;
+            }
+            currentGrid = board[currentGrid.getRow() - 1][currentCol];
+        }
+        // uncount duplicate
+        count--;
+
+        return count >= n;
+    }
+
+    public static boolean didPlayerWinDiagonalRight(BoardGrid[][] board, int currentRow, int currentCol, Player currentPlayer) {
+        int count = 0;
+        int n = board.length;
+        BoardGrid currentGrid = board[currentRow][currentCol];
+        // count player's marker upwards diagonal right
+        while (currentGrid.isOccupied() && currentGrid.getOccupant() == currentPlayer) {
+            count++;
+            if (currentGrid.getRow() == 0 || currentGrid.getCol() == n - 1) {
+                break;
+            }
+            currentGrid = board[currentGrid.getRow() - 1][currentGrid.getCol() + 1];
+        }
+        // reset the current grid (this will have a duplicate count)
+        currentGrid = board[currentRow][currentCol];
+
+        // count player's marker downwards diagonal right
+        while (currentGrid.isOccupied() && currentGrid.getOccupant() == currentPlayer) {
+            count++;
+            if (currentGrid.getRow() == n - 1 || currentGrid.getCol() == 0) {
+                break;
+            }
+            currentGrid = board[currentGrid.getRow() + 1][currentGrid.getCol() - 1];
+        }
+        // uncount duplicate
+        count--;
+
+        return count >= board.length;
+    }
+
+    public static boolean didPlayerWinDiagonalLeft(BoardGrid[][] board, int currentRow, int currentCol, Player currentPlayer) {
+        int count = 0;
+        int n = board.length;
+        BoardGrid currentGrid = board[currentRow][currentCol];
+        // count player's marker upwards diagonal left
+        while (currentGrid.isOccupied() && currentGrid.getOccupant() == currentPlayer) {
+            count++;
+            if (currentGrid.getRow() == 0 || currentGrid.getCol() == 0) {
+                break;
+            }
+            currentGrid = board[currentGrid.getRow() - 1][currentGrid.getCol() - 1];
+        }
+        // reset the current grid (this will have a duplicate count)
+        currentGrid = board[currentRow][currentCol];
+
+        // count player's marker downwards diagonal left
+        while (currentGrid.isOccupied() && currentGrid.getOccupant() == currentPlayer) {
+            count++;
+            if (currentGrid.getRow() == n - 1 || currentGrid.getCol() == n - 1) {
+                break;
+            }
+            currentGrid = board[currentGrid.getRow() + 1][currentGrid.getCol() + 1];
+        }
+        // uncount duplicate
+        count--;
+
+        return count >= board.length;
     }
 
     public static double getRandomNumber(int min, int max) {
